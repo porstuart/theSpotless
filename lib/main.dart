@@ -6,7 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 String _email, _password;
-String urlLogin = "http://pickupandlaundry.com/thespotless/stuart/php/login.php";
+String urlLogin =
+    "http://pickupandlaundry.com/thespotless/stuart/php/login.php";
 
 void main() => runApp(SplashScreen());
 
@@ -80,9 +81,7 @@ class _ProgressIndicatorState extends State<ProgressIndicator>
   Widget build(BuildContext context) {
     return new Center(
         child: new Container(
-      child: CircularProgressIndicator(
-        
-      ),
+      child: CircularProgressIndicator(),
     ));
   }
 }
@@ -90,12 +89,12 @@ class _ProgressIndicatorState extends State<ProgressIndicator>
 void loadpref(BuildContext ctx) async {
   print('Inside loadpref()');
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  _email = (prefs.getString('email')??'');
-  _password = (prefs.getString('pass')??'');
+  _email = (prefs.getString('email') ?? '');
+  _password = (prefs.getString('pass') ?? '');
   print("Splash:Preference");
   print(_email);
   print(_password);
-  if (_isEmailValid(_email??"no email")) {
+  if (_isEmailValid(_email ?? "no email")) {
     //try to login if got email;
     _onLogin(_email, _password, ctx);
   } else {
