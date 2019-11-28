@@ -1,113 +1,154 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
+import 'package:flutter/services.dart';
+import 'mainScreen.dart';
+import 'user.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
-import 'loginScreen.dart';
+String _email, _password;
+String urlLogin = "http://pickupandlaundry.com/thespotless/stuart/php/login.php";
 
-void main() => runApp(MaterialApp(
-      theme:
-          ThemeData(primaryColor: Colors.red, accentColor: Colors.yellowAccent),
+void main() => runApp(SplashScreen());
+
+class SplashScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(
+        SystemUiOverlayStyle(statusBarColor: Colors.blue));
+    return MaterialApp(
+      theme: new ThemeData(
+        primaryColor: Colors.blue,
+        primarySwatch: Colors.blue,
+        accentColor: Colors.blue,
+      ),
       debugShowCheckedModeBanner: false,
-      home: SplashScreen(),
-    ));
-
-class SplashScreen extends StatefulWidget {
-  @override
-  _SplashScreenState createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  @override
-  void initState() {
-    super.initState();
-    Timer(
-      Duration(seconds: 3),
-      () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => LoginScreen(),
+      home: Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Image.asset(
+                'assets/images/splashScreenLogo.png',
+                scale: 3,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              new ProgressIndicator(),
+            ],
+          ),
         ),
       ),
     );
   }
+}
+
+class ProgressIndicator extends StatefulWidget {
+  @override
+  _ProgressIndicatorState createState() => new _ProgressIndicatorState();
+}
+
+class _ProgressIndicatorState extends State<ProgressIndicator>
+    with SingleTickerProviderStateMixin {
+  AnimationController controller;
+  Animation<double> animation;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = AnimationController(
+        duration: const Duration(milliseconds: 2000), vsync: this);
+    animation = Tween(begin: 0.0, end: 1.0).animate(controller)
+      ..addListener(() {
+        setState(() {
+          if (animation.value > 0.99) {
+            //print('Sucess Login');
+            loadpref(this.context);
+          }
+        });
+      });
+    controller.repeat();
+  }
+
+  @override
+  void dispose() {
+    controller.stop();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: Stack(
-      fit: StackFit.expand,
-      children: <Widget>[
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.cyan[500],
-                Colors.cyan[500],
-                Colors.cyan[400],
-                Colors.cyan[300],
-              ],
-              stops: [0.1, 0.4, 0.7, 0.9],
-            ),
-          ),
-        ),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Expanded(
-              flex: 2,
-              child: Container(
-                child: Container(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Image.asset(
-                        'assets/images/splashScreenLogo.png',
-                        height: 120,
-                        width: 100,
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(top: 10.0),
-                      ),
-                      Text(
-                        "the spotless",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 24.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 1,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  CircularProgressIndicator(
-                    valueColor: new AlwaysStoppedAnimation<Color>(Colors.black),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(top: 20.0),
-                  ),
-                  Text(
-                    "Be Spotless \n Be Bright",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ],
+    return new Center(
+        child: new Container(
+      child: CircularProgressIndicator(
+        
+      ),
     ));
   }
+}
+
+void loadpref(BuildContext ctx) async {
+  print('Inside loadpref()');
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  _email = (prefs.getString('email')??'');
+  _password = (prefs.getString('pass')??'');
+  print("Splash:Preference");
+  print(_email);
+  print(_password);
+  if (_isEmailValid(_email??"no email")) {
+    //try to login if got email;
+    _onLogin(_email, _password, ctx);
+  } else {
+    //login as unregistered user
+    User user = new User(
+        name: "not register",
+        email: "user@noregister",
+        phone: "not register",
+        radius: "15",
+        credit: "0",
+        rating: "0");
+    Navigator.push(
+        ctx, MaterialPageRoute(builder: (context) => MainScreen(user: user)));
+  }
+}
+
+bool _isEmailValid(String email) {
+  return RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(email);
+}
+
+void _onLogin(String email, String pass, BuildContext ctx) {
+  http.post(urlLogin, body: {
+    "email": _email,
+    "password": _password,
+  }).then((res) {
+    print(res.statusCode);
+    var string = res.body;
+    List dres = string.split(",");
+    print("SPLASH:loading");
+    print(dres);
+    if (dres[0] == "success") {
+      User user = new User(
+          name: dres[1],
+          email: dres[2],
+          phone: dres[3],
+          radius: dres[4],
+          credit: dres[5],
+          rating: dres[6]);
+      Navigator.push(
+          ctx, MaterialPageRoute(builder: (context) => MainScreen(user: user)));
+    } else {
+      //allow login as unregistered user
+      User user = new User(
+          name: "not register",
+          email: "user@noregister",
+          phone: "not register",
+          radius: "15",
+          credit: "0",
+          rating: "0");
+      Navigator.push(
+          ctx, MaterialPageRoute(builder: (context) => MainScreen(user: user)));
+    }
+  }).catchError((err) {
+    print(err);
+  });
 }

@@ -1,289 +1,201 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
-import 'package:progress_dialog/progress_dialog.dart';
-import 'package:http/http.dart' as http;
+import 'Loginscreen.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:toast/toast.dart';
-import 'loginScreen.dart';
+import 'package:http/http.dart' as http;
+import 'package:progress_dialog/progress_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+String pathAsset = 'assets/images/profile.png';
 String urlUpload =
     "http://pickupandlaundry.com/thespotless/stuart/php/registration.php";
-
-final TextEditingController _emailController = TextEditingController();
+File _image;
 final TextEditingController _nameController = TextEditingController();
-final TextEditingController _passController = TextEditingController();
-final TextEditingController _conPasscontroller = TextEditingController();
+final TextEditingController _emailController = TextEditingController();
+final TextEditingController _passwordController = TextEditingController();
 final TextEditingController _phoneController = TextEditingController();
-
-class SizeConfig {
-  static MediaQueryData _mediaQueryData;
-  static double screenWidth;
-  static double screenHeight;
-  static double blockSizeHorizontal;
-  static double blockSizeVertical;
-
-  void init(BuildContext context) {
-    _mediaQueryData = MediaQuery.of(context);
-    screenWidth = _mediaQueryData.size.width;
-    screenHeight = _mediaQueryData.size.height;
-  }
-}
+String _name, _email, _password, _phone;
 
 class RegisterScreen extends StatefulWidget {
-  RegisterScreen({Key key}) : super(key: key);
-
   @override
-  _RegisterScreenState createState() => _RegisterScreenState();
+  _RegisterUserState createState() => _RegisterUserState();
+  const RegisterScreen({Key key, File image}) : super(key: key);
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
-  String _email, _name, _password, _phoneNum;
+class _RegisterUserState extends State<RegisterScreen> {
+  @override
+  void initState() {
+    super.initState();
+  }
 
-  Widget _buildEmailTF() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        SizedBox(
-          height: 10.0,
+  @override
+  Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(
+        SystemUiOverlayStyle(statusBarColor: Colors.deepOrange));
+    return WillPopScope(
+      onWillPop: _onBackPressAppBar,
+      child: Scaffold(
+        resizeToAvoidBottomPadding: false,
+        appBar: AppBar(
+          backgroundColor: Colors.deepOrange,
+          title: Text('New User Registration'),
         ),
-        Container(
-          alignment: Alignment.centerLeft,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10.0),
+        body: SingleChildScrollView(
+          child: Container(
+            padding: EdgeInsets.fromLTRB(40, 20, 40, 20),
+            child: RegisterWidget(),
           ),
-          height: 60.0,
-          child: TextField(
+        ),
+      ),
+    );
+  }
+
+  Future<bool> _onBackPressAppBar() async {
+    _image = null;
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LoginPage(),
+        ));
+    return Future.value(false);
+  }
+}
+
+class RegisterWidget extends StatefulWidget {
+  @override
+  RegisterWidgetState createState() => RegisterWidgetState();
+}
+
+class RegisterWidgetState extends State<RegisterWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        GestureDetector(
+            onTap: _choose,
+            child: Container(
+              width: 180,
+              height: 200,
+              decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    image: _image == null
+                        ? AssetImage(pathAsset)
+                        : FileImage(_image),
+                    fit: BoxFit.fill,
+                  )),
+            )),
+        Text('Click on image above to take profile picture'),
+        TextField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: 'OpenSans',
-            ),
             decoration: InputDecoration(
-              focusedBorder: new UnderlineInputBorder(
-                borderSide: BorderSide(
-                  color: Colors.black,
-                  width: 2.0,
-                ),
-              ),
-              contentPadding: EdgeInsets.only(
-                top: 14.0,
-              ),
-              prefixIcon: Icon(
-                Icons.email,
-                color: Colors.white,
-              ),
-              hintText: 'Email',
-              hintStyle: TextStyle(
-                color: Colors.white54,
-                fontFamily: 'OpenSans',
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildNameTF() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        SizedBox(
-          height: 5.0,
-        ),
-        Container(
-          alignment: Alignment.centerLeft,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          height: 60.0,
-          child: TextField(
+              labelText: 'Email',
+              icon: Icon(Icons.email),
+            )),
+        TextField(
             controller: _nameController,
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: 'OpenSans',
-            ),
+            keyboardType: TextInputType.text,
             decoration: InputDecoration(
-              focusedBorder: new UnderlineInputBorder(
-                borderSide: BorderSide(
-                  color: Colors.black,
-                  width: 2.0,
-                ),
-              ),
-              contentPadding: EdgeInsets.only(
-                top: 14.0,
-              ),
-              prefixIcon: Icon(
-                Icons.person,
-                color: Colors.white,
-              ),
-              hintText: 'Full Name',
-              hintStyle: TextStyle(
-                color: Colors.white54,
-                fontFamily: 'OpenSans',
-              ),
-            ),
-          ),
+              labelText: 'Name',
+              icon: Icon(Icons.person),
+            )),
+        TextField(
+          controller: _passwordController,
+          decoration:
+              InputDecoration(labelText: 'Password', icon: Icon(Icons.lock)),
+          obscureText: true,
         ),
-      ],
-    );
-  }
-
-  Widget _buildPasswordTF() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        SizedBox(
-          height: 5.0,
-        ),
-        Container(
-          alignment: Alignment.centerLeft,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          height: 60.0,
-          child: TextField(
-            controller: _passController,
-            obscureText: true,
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: 'OpenSans',
-            ),
-            decoration: InputDecoration(
-              focusedBorder: new UnderlineInputBorder(
-                borderSide: BorderSide(
-                  color: Colors.black,
-                  width: 2.0,
-                ),
-              ),
-              contentPadding: EdgeInsets.only(
-                top: 14.0,
-              ),
-              prefixIcon: Icon(
-                Icons.lock,
-                color: Colors.white,
-              ),
-              hintText: 'Password',
-              hintStyle: TextStyle(
-                color: Colors.white54,
-                fontFamily: 'OpenSans',
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPhoneTF() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        SizedBox(
-          height: 5.0,
-        ),
-        Container(
-          alignment: Alignment.centerLeft,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          height: 60.0,
-          child: TextField(
+        TextField(
             controller: _phoneController,
-            keyboardType: TextInputType.number,
-            inputFormatters: <TextInputFormatter>[
-              WhitelistingTextInputFormatter.digitsOnly
-            ],
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: 'OpenSans',
-            ),
-            decoration: InputDecoration(
-              focusedBorder: new UnderlineInputBorder(
-                borderSide: BorderSide(
-                  color: Colors.black,
-                  width: 2.0,
-                ),
-              ),
-              contentPadding: EdgeInsets.only(
-                top: 14.0,
-              ),
-              prefixIcon: Icon(
-                Icons.phone_android,
-                color: Colors.white,
-              ),
-              hintText: 'Phone Number',
-              hintStyle: TextStyle(
-                color: Colors.white54,
-                fontFamily: 'OpenSans',
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRegisterBtn() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
+            keyboardType: TextInputType.phone,
+            decoration:
+                InputDecoration(labelText: 'Phone', icon: Icon(Icons.phone))),
         SizedBox(
           height: 10,
         ),
-        RaisedButton(
+        MaterialButton(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+          minWidth: 300,
+          height: 50,
           child: Text('Register'),
-          color: Colors.white,
-          elevation: 10,
+          color: Colors.deepOrange,
+          textColor: Colors.white,
+          elevation: 15,
           onPressed: _onRegister,
         ),
+        SizedBox(
+          height: 10,
+        ),
+        GestureDetector(
+            onTap: _onBackPress,
+            child: Text('Already Register', style: TextStyle(fontSize: 16))),
       ],
     );
   }
 
+  void _choose() async {
+    _image = await ImagePicker.pickImage(source: ImageSource.camera);
+    setState(() {});
+    //_image = await ImagePicker.pickImage(source: ImageSource.gallery);
+  }
+
   void _onRegister() {
-    print("onRegister Button from RegisterUser()");
+    print('onRegister Button from RegisterUser()');
+    print(_image.toString());
     uploadData();
   }
 
+  void _onBackPress() {
+    _image = null;
+    print('onBackpress from RegisterUser');
+    Navigator.pushReplacement(context,
+        MaterialPageRoute(builder: (BuildContext context) => LoginPage()));
+  }
+
   void uploadData() {
-    _email = _emailController.text;
     _name = _nameController.text;
-    _password = _passController.text;
-    _phoneNum = _phoneController.text;
+    _email = _emailController.text;
+    _password = _passwordController.text;
+    _phone = _phoneController.text;
 
     if ((_isEmailValid(_email)) &&
         (_password.length > 5) &&
-        (_phoneNum.length > 5)) {
+        (_image != null) &&
+        (_phone.length > 5)) {
       ProgressDialog pr = new ProgressDialog(context,
           type: ProgressDialogType.Normal, isDismissible: false);
       pr.style(message: "Registration in progress");
       pr.show();
 
+      String base64Image = base64Encode(_image.readAsBytesSync());
       http.post(urlUpload, body: {
-        "email": _email,
+        "encoded_string": base64Image,
         "name": _name,
+        "email": _email,
         "password": _password,
-        "phoneNum": _phoneNum,
+        "phone": _phone,
       }).then((res) {
         print(res.statusCode);
-        Toast.show(res.body, context,
-            duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
         if (res.body == "success") {
-          _emailController.text = '';
+          Toast.show(res.body, context,
+              duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+          _image = null;
+          savepref(_email, _password);
           _nameController.text = '';
-          _passController.text = '';
-          _conPasscontroller.text = '';
+          _emailController.text = '';
           _phoneController.text = '';
+          _passwordController.text = '';
+          pr.dismiss();
           Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                  builder: (BuildContext context) => LoginScreen()));
-        } else {
-          pr.dismiss();
+                  builder: (BuildContext context) => LoginPage()));
         }
       }).catchError((err) {
         print(err);
@@ -298,56 +210,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(email);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    SizeConfig().init(context);
-    return Scaffold(
-        body: Stack(
-      children: <Widget>[
-        Container(
-          height: double.infinity,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.cyan[500],
-                Colors.cyan[500],
-                Colors.cyan[400],
-                Colors.cyan[300],
-              ],
-              stops: [0.1, 0.4, 0.7, 0.9],
-            ),
-          ),
-        ),
-        Container(
-          height: double.infinity,
-          child: SingleChildScrollView(
-            physics: AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.symmetric(
-              horizontal: 40.0,
-              vertical: 60.0,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Image(
-                  image: AssetImage('assets/images/Logo.png'),
-                ),
-                SizedBox(
-                  height: 30.0,
-                ),
-                _buildEmailTF(),
-                _buildNameTF(),
-                _buildPasswordTF(),
-                _buildPhoneTF(),
-                _buildRegisterBtn(),
-              ],
-            ),
-          ),
-        ),
-      ],
-    ));
+  void savepref(String email, String pass) async {
+    print('Inside savepref');
+    _email = _emailController.text;
+    _password = _passwordController.text;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    //true save pref
+    await prefs.setString('email', email);
+    await prefs.setString('pass', pass);
+    print('Save pref $_email');
+    print('Save pref $_password');
   }
 }
