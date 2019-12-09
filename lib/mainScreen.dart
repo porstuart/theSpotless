@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'profileTab.dart';
-import 'user.dart';
-import 'jobTab.dart';
-import 'acceptedJobTab.dart';
+import 'package:thespotless/jobTab.dart';
+import 'package:thespotless/acceptedJobTab.dart';
+import 'package:thespotless/profileTab.dart';
+import 'package:thespotless/user.dart';
 
 class MainScreen extends StatefulWidget {
   final User user;
@@ -23,7 +23,7 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     tabs = [
-      JobScreen(user: widget.user),
+      JobTab(user: widget.user),
       AcceptedJob(user: widget.user),
       ProfileScreen(user: widget.user),
     ];
@@ -41,7 +41,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     //SystemChrome.setEnabledSystemUIOverlays([]);
     SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(statusBarColor: Colors.blue));
+        SystemUiOverlayStyle(statusBarColor: Colors.deepOrange));
     return Scaffold(
       body: tabs[currentTabIndex],
       bottomNavigationBar: BottomNavigationBar(
@@ -56,11 +56,11 @@ class _MainScreenState extends State<MainScreen> {
             title: Text("Jobs"),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.event),
-            title: Text("My Jobs"),
+            icon: Icon(Icons.event, ),
+            title: Text("Accepted Job"),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
+            icon: Icon(Icons.person, ),
             title: Text("Profile"),
           )
         ],

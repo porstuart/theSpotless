@@ -1,48 +1,56 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'job.dart';
-import 'jobDetail.dart';
+import 'package:thespotless/job.dart';
+import 'package:thespotless/jobdetail.dart';
 import 'dart:convert';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:flutter/services.dart';
-import 'user.dart';
+import 'package:thespotless/user.dart';
 import 'package:progress_dialog/progress_dialog.dart';
-import 'SlideRightRoute.dart';
+
+import 'slideRightRoute.dart';
 
 double perpage = 1;
 
-class JobScreen extends StatefulWidget {
+class JobTab extends StatefulWidget {
   final User user;
 
-  JobScreen({Key key, this.user});
+  JobTab({Key key, this.user});
 
   @override
-  _JobScreenState createState() => _JobScreenState();
+  _JobTabState createState() => _JobTabState();
 }
 
-class _JobScreenState extends State<JobScreen> {
+class _JobTabState extends State<JobTab> {
   GlobalKey<RefreshIndicatorState> refreshKey;
 
+  final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
+  Position _currentPosition;
+  String _currentAddress = "Searching current location...";
   List data;
 
   @override
   void initState() {
     super.initState();
     refreshKey = GlobalKey<RefreshIndicatorState>();
+    _getCurrentLocation();
   }
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(statusBarColor: Colors.blue));
+    
+   SystemChrome.setSystemUIOverlayStyle(
+        SystemUiOverlayStyle(statusBarColor: Colors.deepOrange));
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
             resizeToAvoidBottomPadding: false,
+           
             body: RefreshIndicator(
               key: refreshKey,
-              color: Colors.blue,
+              color: Colors.deepOrange,
               onRefresh: () async {
                 await refreshList();
               },
@@ -55,17 +63,21 @@ class _JobScreenState extends State<JobScreen> {
                         child: Column(
                           children: <Widget>[
                             Stack(children: <Widget>[
+                              Image.asset(
+                                "assets/images/background.png",
+                                fit: BoxFit.fitWidth,
+                              ),
                               Column(
                                 children: <Widget>[
                                   SizedBox(
                                     height: 20,
                                   ),
                                   Center(
-                                    child: Text("The Spotless",
+                                    child: Text("MyHelper",
                                         style: TextStyle(
                                             fontSize: 24,
                                             fontWeight: FontWeight.bold,
-                                            color: Colors.black)),
+                                            color: Colors.white)),
                                   ),
                                   SizedBox(height: 10),
                                   Container(
@@ -80,9 +92,8 @@ class _JobScreenState extends State<JobScreen> {
                                           children: <Widget>[
                                             Row(
                                               children: <Widget>[
-                                                Icon(
-                                                  Icons.person,
-                                                ),
+                                                Icon(Icons.person,
+                                                    ),
                                                 SizedBox(
                                                   width: 5,
                                                 ),
@@ -100,9 +111,35 @@ class _JobScreenState extends State<JobScreen> {
                                             ),
                                             Row(
                                               children: <Widget>[
-                                                Icon(
-                                                  Icons.credit_card,
+                                                Icon(Icons.location_on,
+                                                    ),
+                                                SizedBox(
+                                                  width: 5,
                                                 ),
+                                                Flexible(
+                                                  child: Text(_currentAddress),
+                                                ),
+                                              ],
+                                            ),
+                                            Row(
+                                              children: <Widget>[
+                                                Icon(Icons.rounded_corner,
+                                                    ),
+                                                SizedBox(
+                                                  width: 5,
+                                                ),
+                                                Flexible(
+                                                  child: Text(
+                                                      "Job Radius within " +
+                                                          widget.user.radius +
+                                                          " KM"),
+                                                ),
+                                              ],
+                                            ),
+                                            Row(
+                                              children: <Widget>[
+                                                Icon(Icons.credit_card,
+                                                  ),
                                                 SizedBox(
                                                   width: 5,
                                                 ),
@@ -125,7 +162,7 @@ class _JobScreenState extends State<JobScreen> {
                               height: 4,
                             ),
                             Container(
-                              color: Colors.blue,
+                              color: Colors.deepOrange,
                               child: Center(
                                 child: Text("Jobs Available Today",
                                     style: TextStyle(
@@ -162,8 +199,11 @@ class _JobScreenState extends State<JobScreen> {
                             data[index]['jobprice'],
                             data[index]['jobdesc'],
                             data[index]['jobowner'],
+                            data[index]['jobimage'],
                             data[index]['jobtime'],
                             data[index]['jobtitle'],
+                            data[index]['joblatitude'],
+                            data[index]['joblongitude'],
                             data[index]['jobrating'],
                             widget.user.radius,
                             widget.user.name,
@@ -175,15 +215,16 @@ class _JobScreenState extends State<JobScreen> {
                             child: Row(
                               children: <Widget>[
                                 Container(
-                                    height: 100,
-                                    width: 100,
-                                    decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        border: Border.all(color: Colors.white),
-                                        image: DecorationImage(
-                                            fit: BoxFit.fill,
-                                            image: ExactAssetImage(
-                                                'assets/images/washingmachine.PNG')))),
+                                  height: 100,
+                                  width: 100,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                      border: Border.all(color: Colors.white),
+                                      image: DecorationImage(
+                                    fit: BoxFit.fill,
+                                    image: NetworkImage(
+                                    "http://pickupandlaundry.com/thespotless/stuart/images/${data[index]['jobimage']}.jpg"
+                                  )))),
                                 Expanded(
                                   child: Container(
                                     child: Column(
@@ -198,9 +239,8 @@ class _JobScreenState extends State<JobScreen> {
                                         RatingBar(
                                           itemCount: 5,
                                           itemSize: 12,
-                                          initialRating: double.parse(
-                                              data[index]['jobrating']
-                                                  .toString()),
+                                          initialRating: double.parse(data[index]['jobrating']
+                                                .toString()),
                                           itemPadding: EdgeInsets.symmetric(
                                               horizontal: 2.0),
                                           itemBuilder: (context, _) => Icon(
@@ -230,15 +270,48 @@ class _JobScreenState extends State<JobScreen> {
             )));
   }
 
+  _getCurrentLocation() async {
+    geolocator
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
+        .then((Position position) {
+      setState(() {
+        _currentPosition = position;
+        print(_currentPosition);
+      });
+      _getAddressFromLatLng();
+    }).catchError((e) {
+      print(e);
+    });
+  }
+
+  _getAddressFromLatLng() async {
+    try {
+      List<Placemark> p = await geolocator.placemarkFromCoordinates(
+          _currentPosition.latitude, _currentPosition.longitude);
+
+      Placemark place = p[0];
+
+      setState(() {
+        _currentAddress =
+            "${place.name},${place.locality}, ${place.postalCode}, ${place.country}";
+        init(); //load data from database into list array 'data'
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
   Future<String> makeRequest() async {
-    String urlLoadJobs =
-        "http://pickupandlaundry.com/thespotless/stuart/php/loadJob.php";
+    String urlLoadJobs = "http://pickupandlaundry.com/thespotless/stuart/php/loadJob.php";
     ProgressDialog pr = new ProgressDialog(context,
         type: ProgressDialogType.Normal, isDismissible: false);
     pr.style(message: "Loading Jobs");
     pr.show();
     http.post(urlLoadJobs, body: {
       "email": widget.user.email ?? "notavail",
+      "latitude": _currentPosition.latitude.toString(),
+      "longitude": _currentPosition.longitude.toString(),
+      "radius": widget.user.radius ?? "10",
     }).then((res) {
       setState(() {
         var extractdata = json.decode(res.body);
@@ -266,13 +339,18 @@ class _JobScreenState extends State<JobScreen> {
     return null;
   }
 
+  
+
   void _onJobDetail(
       String jobid,
       String jobprice,
       String jobdesc,
       String jobowner,
+      String jobimage,
       String jobtime,
       String jobtitle,
+      String joblatitude,
+      String joblongitude,
       String jobrating,
       String email,
       String name,
@@ -284,12 +362,18 @@ class _JobScreenState extends State<JobScreen> {
         jobdes: jobdesc,
         jobprice: jobprice,
         jobtime: jobtime,
+        jobimage: jobimage,
         jobworker: null,
-        jobrating: jobrating);
+        joblat: joblatitude,
+        joblon: joblongitude,
+        jobrating:jobrating );
     //print(data);
+    
+    Navigator.push(context, SlideRightRoute(page: JobDetail(job: job, user: widget.user)));
   }
 
   void _onJobDelete() {
     print("Delete");
   }
 }
+

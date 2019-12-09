@@ -2,11 +2,12 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'user.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:thespotless/user.dart';
 import 'package:toast/toast.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'job.dart';
-import 'mainscreen.dart';
+import 'mainScreen.dart';
 
 class JobDetail extends StatefulWidget {
   final Job job;
@@ -65,10 +66,18 @@ class DetailInterface extends StatefulWidget {
 }
 
 class _DetailInterfaceState extends State<DetailInterface> {
+  Completer<GoogleMapController> _controller = Completer();
+  CameraPosition _myLocation;
 
   @override
   void initState() {
     super.initState();
+    _myLocation = CameraPosition(
+      target: LatLng(
+          double.parse(widget.job.joblat), double.parse(widget.job.joblon)),
+      zoom: 17,
+    );
+    print(_myLocation.toString());
   }
 
   @override
@@ -76,6 +85,13 @@ class _DetailInterfaceState extends State<DetailInterface> {
     return Column(
       children: <Widget>[
         Center(),
+        Container(
+          width: 280,
+          height: 200,
+          child: Image.network(
+              'http://pickupandlaundry.com/thespotless/stuart/images/${widget.job.jobimage}.jpg',
+              fit: BoxFit.fill),
+        ),
         SizedBox(
           height: 10,
         ),
@@ -114,6 +130,21 @@ class _DetailInterfaceState extends State<DetailInterface> {
                 height: 10,
               ),
               Container(
+                height: 120,
+                width: 340,
+                child: GoogleMap(
+                  // 2
+                  initialCameraPosition: _myLocation,
+                  // 3
+                  mapType: MapType.normal,
+                  // 4
+
+                  onMapCreated: (GoogleMapController controller) {
+                    _controller.complete(controller);
+                  },
+                ),
+              ),
+              Container(
                 width: 350,
                 child: MaterialButton(
                   shape: RoundedRectangleBorder(
@@ -138,22 +169,23 @@ class _DetailInterfaceState extends State<DetailInterface> {
   }
 
   void _onAcceptJob() {
-    if (widget.user.email == "user@noregister") {
+     if (widget.user.email=="user@noregister"){
       Toast.show("Please register to view accept jobs", context,
           duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
       return;
-    } else {
+    }else{
       _showDialog();
     }
     print("Accept Job");
+    
   }
 
   void _showDialog() {
     // flutter defined function
-    if (int.parse(widget.user.credit) < 1) {
-      Toast.show("Credit not enough ", context,
-          duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
-      return;
+    if (int.parse(widget.user.credit)<1){
+        Toast.show("Credit not enough ", context,
+            duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+            return;
     }
     showDialog(
       context: context,
@@ -184,7 +216,7 @@ class _DetailInterfaceState extends State<DetailInterface> {
   }
 
   Future<String> acceptRequest() async {
-    String urlLoadJobs = "http://slumberjer.com/myhelper/php/accept_job.php";
+    String urlLoadJobs = "http://pickupandlaundry.com/thespotless/stuart/php/acceptJob.php";
     ProgressDialog pr = new ProgressDialog(context,
         type: ProgressDialogType.Normal, isDismissible: false);
     pr.style(message: "Accepting Job");
@@ -198,12 +230,12 @@ class _DetailInterfaceState extends State<DetailInterface> {
       if (res.body == "success") {
         Toast.show("Success", context,
             duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
-        pr.dismiss();
-        _onLogin(widget.user.email, context);
+            pr.dismiss();
+            _onLogin(widget.user.email, context);
       } else {
         Toast.show("Failed", context,
             duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
-        pr.dismiss();
+            pr.dismiss();
       }
     }).catchError((err) {
       print(err);
@@ -212,8 +244,8 @@ class _DetailInterfaceState extends State<DetailInterface> {
     return null;
   }
 
-  void _onLogin(String email, BuildContext ctx) {
-    String urlgetuser = "http://slumberjer.com/myhelper/php/get_user.php";
+   void _onLogin(String email, BuildContext ctx) {
+     String urlgetuser = "http://pickupandlaundry.com/thespotless/stuart/php/getUser.php";
 
     http.post(urlgetuser, body: {
       "email": email,

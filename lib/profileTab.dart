@@ -1,38 +1,59 @@
+import 'dart:io';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:flutter/services.dart';
+import 'package:thespotless/loginscreen.dart';
+import 'package:thespotless/payment.dart';
+import 'package:thespotless/registerScreen.dart';
+import 'package:thespotless/main.dart';
+import 'package:thespotless/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toast/toast.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter/services.dart';
-import 'dart:io';
-import 'dart:math';
-import 'dart:convert';
-import 'user.dart';
-import 'main.dart';
-import 'loginScreen.dart';
-import 'registerScreen.dart';
+import 'package:intl/intl.dart';
+import 'package:random_string/random_string.dart';
 
-String urlgetuser = "";
-String urluploadImage = "";
-String urlupdate = "";
+String urlgetuser =
+    "http://pickupandlaundry.com/thespotless/stuart/php/getUser.php";
+String urluploadImage =
+    "http://pickupandlaundry.com/thespotless/stuart/php/upload_imageProfile.php";
+String urlupdate =
+    "http://pickupandlaundry.com/thespotless/stuart/php/updateProfile.php";
 File _image;
 int number = 0;
+String _value;
 
 class ProfileScreen extends StatefulWidget {
+  //final String email;
   final User user;
-
-  ProfileScreen({Key key, this.user});
+  ProfileScreen({this.user});
 
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  GlobalKey<RefreshIndicatorState> refreshKey;
+
+  final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
+  Position _currentPosition;
+  String _currentAddress = "Searching current location...";
+
+  @override
+  void initState() {
+    super.initState();
+    refreshKey = GlobalKey<RefreshIndicatorState>();
+    _getCurrentLocation();
+  }
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(statusBarColor: Colors.blue));
+        SystemUiOverlayStyle(statusBarColor: Colors.deepOrange));
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
@@ -46,14 +67,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Column(
                       children: <Widget>[
                         Stack(children: <Widget>[
+                          Image.asset(
+                            "assets/images/background.png",
+                            fit: BoxFit.fitWidth,
+                          ),
                           Column(
                             children: <Widget>[
                               Center(
-                                child: Text("The Spotless",
+                                child: Text("MyHelper",
                                     style: TextStyle(
                                         fontSize: 24,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.black)),
+                                        color: Colors.white)),
                               ),
                               SizedBox(
                                 height: 5,
@@ -69,7 +94,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         image: new DecorationImage(
                                             fit: BoxFit.cover,
                                             image: new NetworkImage(
-                                                "http://slumberjer.com/myhelper/profile/${widget.user.email}.jpg?dummy=${(number)}'")))),
+                                                "http://pickupandlaundry.com/thespotless/stuart/profile/${widget.user.email}.jpg?dummy=${(number)}'")))),
                               ),
                               SizedBox(height: 5),
                               Container(
@@ -132,6 +157,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: <Widget>[
                                       Icon(
+                                        Icons.rounded_corner,
+                                      ),
+                                      Text("Job Radius " +
+                                              widget.user.radius +
+                                              "KM" ??
+                                          'Job Radius 0 KM'),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                children: <Widget>[
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Icon(
                                         Icons.credit_card,
                                       ),
                                       SizedBox(
@@ -147,11 +188,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                 ],
                               ),
+                              Center(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    Icon(
+                                      Icons.location_on,
+                                    ),
+                                    SizedBox(
+                                      width: 5,
+                                    ),
+                                    Flexible(
+                                      child: Text(_currentAddress),
+                                    ),
+                                  ],
+                                ),
+                              ),
                               SizedBox(
                                 height: 5,
                               ),
                               Container(
-                                color: Colors.blue,
+                                color: Colors.deepOrange,
                                 child: Center(
                                   child: Text("My Profile ",
                                       style: TextStyle(
@@ -189,6 +246,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: Text("CHANGE PHONE"),
                         ),
                         MaterialButton(
+                          onPressed: _changeRadius,
+                          child: Text("CHANGE RADIUS"),
+                        ),
+                        MaterialButton(
+                          onPressed: _loadPayment,
+                          child: Text("BUY CREDIT"),
+                        ),
+                        MaterialButton(
                           onPressed: _registerAccount,
                           child: Text("REGISTER"),
                         ),
@@ -197,7 +262,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: Text("LOG IN"),
                         ),
                         MaterialButton(
-                          onPressed: _logout,
+                          onPressed: _gotologout,
                           child: Text("LOG OUT"),
                         )
                       ],
@@ -259,6 +324,102 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  _getCurrentLocation() async {
+    geolocator
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
+        .then((Position position) {
+      setState(() {
+        _currentPosition = position;
+        print(_currentPosition);
+      });
+      _getAddressFromLatLng();
+    }).catchError((e) {
+      print(e);
+    });
+  }
+
+  _getAddressFromLatLng() async {
+    try {
+      List<Placemark> p = await geolocator.placemarkFromCoordinates(
+          _currentPosition.latitude, _currentPosition.longitude);
+
+      Placemark place = p[0];
+
+      setState(() {
+        _currentAddress =
+            "${place.name},${place.locality}, ${place.postalCode}, ${place.country}";
+        //load data from database into list array 'data'
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void _changeRadius() {
+    if (widget.user.name == "not register") {
+      Toast.show("Not allowed", context,
+          duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+      return;
+    }
+    TextEditingController radiusController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: new Text("Change new Radius (km)?"),
+          content: new TextField(
+              keyboardType: TextInputType.number,
+              controller: radiusController,
+              decoration: InputDecoration(
+                labelText: 'new radius',
+                icon: Icon(Icons.map),
+              )),
+          actions: <Widget>[
+            // usually buttons at the bottom of the dialog
+            new FlatButton(
+              child: new Text("Yes"),
+              onPressed: () {
+                if (radiusController.text.length < 1) {
+                  Toast.show("Please enter new radius ", context,
+                      duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+                  return;
+                }
+                http.post(urlupdate, body: {
+                  "email": widget.user.email,
+                  "radius": radiusController.text,
+                }).then((res) {
+                  var string = res.body;
+                  List dres = string.split(",");
+                  if (dres[0] == "success") {
+                    setState(() {
+                      widget.user.radius = dres[4];
+                      Toast.show("Success ", context,
+                          duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+                      Navigator.of(context).pop();
+                      return;
+                    });
+                  } else {}
+                }).catchError((err) {
+                  print(err);
+                });
+                Toast.show("Failed ", context,
+                    duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+              },
+            ),
+            new FlatButton(
+              child: new Text("No"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _logout() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('email', '');
@@ -283,7 +444,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (BuildContext context) {
         // return object of type Dialog
         return AlertDialog(
-          title: new Text("Change " + widget.user.name),
+          title: new Text("Change name for " + widget.user.name + "?"),
           content: new TextField(
               controller: nameController,
               decoration: InputDecoration(
@@ -311,16 +472,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     print('in success');
                     setState(() {
                       widget.user.name = dres[1];
-                      if (dres[0] == "success") {
-                        print("in setstate");
-                        widget.user.name = dres[1];
-                      }
                     });
+                    Toast.show("Success", context,
+                        duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+                    Navigator.of(context).pop();
+                    return;
                   } else {}
                 }).catchError((err) {
                   print(err);
                 });
-                Navigator.of(context).pop();
+                Toast.show("Failed", context,
+                    duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
               },
             ),
             new FlatButton(
@@ -506,7 +668,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _gotologinPage() {
-    TextEditingController phoneController = TextEditingController();
     // flutter defined function
     print(widget.user.name);
     showDialog(
@@ -522,9 +683,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: new Text("Yes"),
               onPressed: () {
                 Navigator.of(context).pop();
-                print(
-                  phoneController.text,
-                );
                 Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -543,9 +701,133 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  void _gotologout() async {
+    // flutter defined function
+    print(widget.user.name);
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: new Text("Go to login page?" + widget.user.name),
+          content: new Text("Are your sure?"),
+          actions: <Widget>[
+            // usually buttons at the bottom of the dialog
+            new FlatButton(
+              child: new Text("Yes"),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                await prefs.setString('email', '');
+                await prefs.setString('pass', '');
+                print("LOGOUT");
+                Navigator.pop(context,
+                    MaterialPageRoute(builder: (context) => SplashScreen()));
+              },
+            ),
+            new FlatButton(
+              child: new Text("No"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void savepref(String pass) async {
     print('Inside savepref');
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('pass', pass);
+  }
+
+  void _loadPayment() async {
+    // flutter defined function
+    if (widget.user.name == "not register") {
+      Toast.show("Not allowed please register", context,
+          duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: new Text("Buy Credit?"),
+          content: Container(
+            height: 100,
+            child: DropdownExample(),
+          ),
+          actions: <Widget>[
+            // usually buttons at the bottom of the dialog
+            new FlatButton(
+              child: new Text("Yes"),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                var now = new DateTime.now();
+                var formatter = new DateFormat('ddMMyyyyhhmmss-');
+                String formatted =
+                    formatter.format(now) + randomAlphaNumeric(10);
+                print(formatted);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => PaymentScreen(
+                            user: widget.user,
+                            orderid: formatted,
+                            val: _value)));
+              },
+            ),
+            new FlatButton(
+              child: new Text("No"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class DropdownExample extends StatefulWidget {
+  @override
+  _DropdownExampleState createState() {
+    return _DropdownExampleState();
+  }
+}
+
+class _DropdownExampleState extends State<DropdownExample> {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: DropdownButton<String>(
+        items: [
+          DropdownMenuItem<String>(
+            child: Text('50 HCredit (RM10)'),
+            value: '10',
+          ),
+          DropdownMenuItem<String>(
+            child: Text('100 HCredit (RM20)'),
+            value: '20',
+          ),
+          DropdownMenuItem<String>(
+            child: Text('150 HCredit (RM30)'),
+            value: '30',
+          ),
+        ],
+        onChanged: (String value) {
+          setState(() {
+            _value = value;
+          });
+        },
+        hint: Text('Select Credit'),
+        value: _value,
+      ),
+    );
   }
 }

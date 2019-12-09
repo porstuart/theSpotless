@@ -1,4 +1,4 @@
-package com.example.register_login
+package com.example.thespotless
 
 import android.os.Bundle
 

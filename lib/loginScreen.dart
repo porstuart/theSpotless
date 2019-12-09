@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'mainscreen.dart';
-import 'registerScreen.dart';
+import 'package:thespotless/mainScreen.dart';
+import 'package:thespotless/registerScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
@@ -43,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(statusBarColor: Colors.deepOrangeAccent));
+        SystemUiOverlayStyle(statusBarColor: Colors.blueAccent));
     return WillPopScope(
         onWillPop: _onBackPressAppBar,
         child: Scaffold(
@@ -54,7 +54,7 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Image.asset(
-                  'assets/images/myhelper.png',
+                  'assets/images/Logo.png',
                   scale: 3.5,
                 ),
                 TextField(
@@ -77,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
                   minWidth: 300,
                   height: 50,
                   child: Text('Login'),
-                  color: Colors.deepOrange,
+                  color: Colors.blue,
                   textColor: Colors.white,
                   elevation: 15,
                   onPressed: _onLogin,
