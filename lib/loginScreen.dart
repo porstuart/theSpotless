@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:thespotless/mainScreen.dart';
-import 'package:thespotless/registerScreen.dart';
+import 'package:thespotless/forgotpassword.dart';
+import 'package:thespotless/mainscreen.dart';
+import 'package:thespotless/registrationscreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 import 'package:progress_dialog/progress_dialog.dart';
-import 'user.dart';
 
-String urlLogin =
-    "http://pickupandlaundry.com/thespotless/stuart/php/login.php";
-final TextEditingController _emailController = TextEditingController();
-String _email = "";
-final TextEditingController _passwordController = TextEditingController();
-String _password = "";
-bool _isChecked = false;
+import 'laundry.dart';
+
+
+String urlLogin = "http://pickupandlaundry.com/thespotless/stuart/php/login.php";
+String urlSecurityCodeForResetPass ='https://pickupandlaundry.com/thespotless/stuart/php/securitycode.php';
 
 void main() => runApp(MyApp());
 
@@ -33,17 +31,21 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _emcontroller = TextEditingController();
+  String _email = "";
+  final TextEditingController _passcontroller = TextEditingController();
+  String _password = "";
+  bool _isChecked = false;
+
   @override
   void initState() {
-    loadpref();
+
     print('Init: $_email');
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(statusBarColor: Colors.blueAccent));
     return WillPopScope(
         onWillPop: _onBackPressAppBar,
         child: Scaffold(
@@ -54,16 +56,16 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Image.asset(
-                  'assets/images/Logo.png',
-                  scale: 3.5,
+                  'assets/images/logo2.png',
+                  scale: 2.5,
                 ),
                 TextField(
-                    controller: _emailController,
+                    controller: _emcontroller,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
                         labelText: 'Email', icon: Icon(Icons.email))),
                 TextField(
-                  controller: _passwordController,
+                  controller: _passcontroller,
                   decoration: InputDecoration(
                       labelText: 'Password', icon: Icon(Icons.lock)),
                   obscureText: true,
@@ -77,8 +79,8 @@ class _LoginPageState extends State<LoginPage> {
                   minWidth: 300,
                   height: 50,
                   child: Text('Login'),
-                  color: Colors.blue,
-                  textColor: Colors.white,
+                  color: Colors.orange,
+                  textColor: Colors.black,
                   elevation: 15,
                   onPressed: _onLogin,
                 ),
@@ -90,7 +92,7 @@ class _LoginPageState extends State<LoginPage> {
                     Checkbox(
                       value: _isChecked,
                       onChanged: (bool value) {
-                        _onChange(value);
+                        _onstuartge(value);
                       },
                     ),
                     Text('Remember Me', style: TextStyle(fontSize: 16))
@@ -106,44 +108,39 @@ class _LoginPageState extends State<LoginPage> {
                 GestureDetector(
                     onTap: _onForgot,
                     child:
-                        Text('Forgot Account', style: TextStyle(fontSize: 16))),
+                        Text('Forgot Password', style: TextStyle(fontSize: 16))),
               ],
             ),
           ),
         ));
   }
-
-  void _onLogin() {
-    _email = _emailController.text;
-    _password = _passwordController.text;
+    
+    void _onLogin(){
+      _email = _emcontroller.text;
+    _password = _passcontroller.text;
     if (_isEmailValid(_email) && (_password.length > 4)) {
       ProgressDialog pr = new ProgressDialog(context,
           type: ProgressDialogType.Normal, isDismissible: false);
-      pr.style(message: "Login in");
+      pr.style(message: "Log in");
       pr.show();
       http.post(urlLogin, body: {
         "email": _email,
         "password": _password,
       }).then((res) {
         print(res.statusCode);
-        var string = res.body;
+         var string = res.body;
         List dres = string.split(",");
         print(dres);
         Toast.show(dres[0], context,
             duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
         if (dres[0] == "success") {
           pr.dismiss();
-          print("Radius:");
           print(dres);
-          User user = new User(
-              name: dres[1],
-              email: dres[2],
-              phone: dres[3],
-              radius: dres[4],
-              credit: dres[5],
-              rating: dres[6]);
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => MainScreen(user: user)));
+         Laundry laundry = new Laundry(name:dres[1],email: dres[2],phone:dres[3],credit: dres[4]);
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => MainScreen(laundry: laundry)));
         } else {
           pr.dismiss();
         }
@@ -154,17 +151,60 @@ class _LoginPageState extends State<LoginPage> {
     } else {}
   }
 
-  void _onRegister() {
+    void _onForgot(){
+    _email = _emcontroller.text;
+
+    if (_isEmailValid(_email)) {
+      ProgressDialog pr = new ProgressDialog(context,
+          type: ProgressDialogType.Normal, isDismissible: false);
+      pr.style(message: "Sending Email");
+      pr.show();
+      http.post(urlSecurityCodeForResetPass, body: {
+        "email": _email,
+      }).then((res) {
+        print("secure code : " + res.body);
+        if (res.body == "error") {
+          pr.dismiss();
+          Toast.show('error', context,
+            duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+        } else {
+          pr.dismiss();
+          _saveEmailForPassReset(_email);
+          _saveSecureCode(res.body); 
+          Toast.show('Security code sent to your email', context,
+              duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => ForgotPassword()));
+        }
+      }).catchError((err) {
+        pr.dismiss();
+        print(err);
+      });
+    } else {
+      Toast.show('Invalid Email', context,
+          duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+    }
+  }
+
+  void _saveEmailForPassReset(String email) async {
+    print('saving preferences');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('resetPassEmail', email);
+  }
+
+  void _saveSecureCode(String code) async {
+    print('saving preferences');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('secureCode', code);
+  }
+
+    void _onRegister(){
     print('onRegister');
     Navigator.push(
         context, MaterialPageRoute(builder: (context) => RegisterScreen()));
-  }
+    }
 
-  void _onForgot() {
-    print('Forgot');
-  }
-
-  void _onChange(bool value) {
+    void _onstuartge(bool value) {
     setState(() {
       _isChecked = value;
       savepref(value);
@@ -179,8 +219,8 @@ class _LoginPageState extends State<LoginPage> {
     print(_email);
     print(_password);
     if (_email.length > 1) {
-      _emailController.text = _email;
-      _passwordController.text = _password;
+      _emcontroller.text = _email;
+      _passcontroller.text = _password;
       setState(() {
         _isChecked = true;
       });
@@ -194,8 +234,8 @@ class _LoginPageState extends State<LoginPage> {
 
   void savepref(bool value) async {
     print('Inside savepref');
-    _email = _emailController.text;
-    _password = _passwordController.text;
+    _email = _emcontroller.text;
+    _password = _passcontroller.text;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (value) {
       //true save pref
@@ -218,8 +258,8 @@ class _LoginPageState extends State<LoginPage> {
       await prefs.setString('email', '');
       await prefs.setString('pass', '');
       setState(() {
-        _emailController.text = '';
-        _passwordController.text = '';
+        _emcontroller.text = '';
+        _passcontroller.text = '';
         _isChecked = false;
       });
       print('Remove pref');
@@ -229,12 +269,19 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<bool> _onBackPressAppBar() async {
-    SystemNavigator.pop();
-    print('Backpress');
-    return Future.value(false);
+    Laundry laundry = new Laundry(
+          name: "not register",
+          email: "user@noregister",
+          phone: "not register",
+          );
+    print('onBackpress from LoginUser');
+    Navigator.pushReplacement(context,
+        MaterialPageRoute(builder: (BuildContext context) => MainScreen(laundry: laundry)));
+        return Future.value(false);
   }
 
   bool _isEmailValid(String email) {
     return RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(email);
   }
+  
 }

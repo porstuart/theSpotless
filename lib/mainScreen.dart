@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:thespotless/jobTab.dart';
-import 'package:thespotless/acceptedJobTab.dart';
-import 'package:thespotless/profileTab.dart';
-import 'package:thespotless/user.dart';
+import 'package:thespotless/mypost.dart';
+import 'package:thespotless/joblist.dart';
+import 'package:thespotless/myjob.dart';
+import 'package:thespotless/profile.dart';
+import 'package:thespotless/laundry.dart';
 
 class MainScreen extends StatefulWidget {
-  final User user;
+  final Laundry laundry;
 
-  const MainScreen({Key key, this.user}) : super(key: key);
+  const MainScreen({Key key,this.laundry}) : super(key: key);
 
+  
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -23,25 +24,23 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     tabs = [
-      JobTab(user: widget.user),
-      AcceptedJob(user: widget.user),
-      ProfileScreen(user: widget.user),
+      JobList(laundry: widget.laundry),
+      MyJob(laundry: widget.laundry),
+      MyPost(laundry: widget.laundry),
+      Profile(laundry: widget.laundry),
     ];
   }
-
-  String $pagetitle = "The Spotless";
+  
+  String $pagetitle = "My Pickup";
 
   onTapped(int index) {
     setState(() {
       currentTabIndex = index;
     });
   }
-
   @override
   Widget build(BuildContext context) {
-    //SystemChrome.setEnabledSystemUIOverlays([]);
-    SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(statusBarColor: Colors.deepOrange));
+     
     return Scaffold(
       body: tabs[currentTabIndex],
       bottomNavigationBar: BottomNavigationBar(
@@ -51,20 +50,25 @@ class _MainScreenState extends State<MainScreen> {
         type: BottomNavigationBarType.fixed,
 
         items: [
+          
           BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            title: Text("Jobs"),
+            icon: Icon(Icons.list, ),
+            title: Text("Job List"),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.event, ),
-            title: Text("Accepted Job"),
+            title: Text("My Job"),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person, ),
+            icon: Icon(Icons.event, ),
+            title: Text("My Post"),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person ),
             title: Text("Profile"),
-          )
+          ),
         ],
       ),
-    );
+      );
   }
-}
+  }

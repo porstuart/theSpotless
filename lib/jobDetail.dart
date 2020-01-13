@@ -2,24 +2,25 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:thespotless/user.dart';
+import 'package:thespotless/laundry.dart';
 import 'package:toast/toast.dart';
 import 'package:progress_dialog/progress_dialog.dart';
-import 'job.dart';
-import 'mainScreen.dart';
+import 'package:thespotless/job.dart';
+import 'mainscreen.dart';
 
 class JobDetail extends StatefulWidget {
   final Job job;
-  final User user;
+  final Laundry laundry;
+ 
 
-  const JobDetail({Key key, this.job, this.user}) : super(key: key);
+  const JobDetail({Key key, this.job, this.laundry}) : super(key: key);
 
   @override
   _JobDetailState createState() => _JobDetailState();
 }
 
 class _JobDetailState extends State<JobDetail> {
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
@@ -37,7 +38,7 @@ class _JobDetailState extends State<JobDetail> {
               padding: EdgeInsets.fromLTRB(40, 20, 40, 20),
               child: DetailInterface(
                 job: widget.job,
-                user: widget.user,
+                laundry: widget.laundry,
               ),
             ),
           )),
@@ -49,58 +50,46 @@ class _JobDetailState extends State<JobDetail> {
         context,
         MaterialPageRoute(
           builder: (context) => MainScreen(
-            user: widget.user,
+            laundry: widget.laundry,
           ),
         ));
     return Future.value(false);
   }
+
 }
 
 class DetailInterface extends StatefulWidget {
   final Job job;
-  final User user;
-  DetailInterface({this.job, this.user});
+  final Laundry laundry;
+  DetailInterface({this.job, this.laundry});
 
   @override
   _DetailInterfaceState createState() => _DetailInterfaceState();
 }
 
 class _DetailInterfaceState extends State<DetailInterface> {
-  Completer<GoogleMapController> _controller = Completer();
-  CameraPosition _myLocation;
 
-  @override
-  void initState() {
-    super.initState();
-    _myLocation = CameraPosition(
-      target: LatLng(
-          double.parse(widget.job.joblat), double.parse(widget.job.joblon)),
-      zoom: 17,
-    );
-    print(_myLocation.toString());
-  }
+ 
 
   @override
   Widget build(BuildContext context) {
+    
     return Column(
       children: <Widget>[
         Center(),
         Container(
           width: 280,
           height: 200,
-          child: Image.network(
-              'http://pickupandlaundry.com/thespotless/stuart/images/${widget.job.jobimage}.jpg',
-              fit: BoxFit.fill),
+         
         ),
         SizedBox(
           height: 10,
         ),
-        Text(widget.job.jobtitle.toUpperCase(),
+        Text(widget.job.job_name.toUpperCase(),
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
             )),
-        Text(widget.job.jobtime),
         Container(
           alignment: Alignment.topLeft,
           child: Column(
@@ -113,37 +102,37 @@ class _DetailInterfaceState extends State<DetailInterface> {
                 TableRow(children: [
                   Text("Job Description",
                       style: TextStyle(fontWeight: FontWeight.bold)),
-                  Text(widget.job.jobdes),
-                ]),
-                TableRow(children: [
-                  Text("Job Price",
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  Text("RM" + widget.job.jobprice),
+                  Text(widget.job.job_desc),
                 ]),
                 TableRow(children: [
                   Text("Job Location",
                       style: TextStyle(fontWeight: FontWeight.bold)),
-                  Text("")
+                  Text(widget.job.job_location),
                 ]),
+                TableRow(children: [
+                  Text("Job Destination",
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text(widget.job.job_destination),
+                ]),
+                TableRow(children: [
+                  Text("Customer",
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text(widget.job.job_owner),
+                ]),
+                TableRow(children: [
+                  Text("Date",
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text(widget.job.job_date),
+                ]),
+                
+                
+
+                
               ]),
               SizedBox(
                 height: 10,
               ),
-              Container(
-                height: 120,
-                width: 340,
-                child: GoogleMap(
-                  // 2
-                  initialCameraPosition: _myLocation,
-                  // 3
-                  mapType: MapType.normal,
-                  // 4
-
-                  onMapCreated: (GoogleMapController controller) {
-                    _controller.complete(controller);
-                  },
-                ),
-              ),
+              
               Container(
                 width: 350,
                 child: MaterialButton(
@@ -169,7 +158,7 @@ class _DetailInterfaceState extends State<DetailInterface> {
   }
 
   void _onAcceptJob() {
-     if (widget.user.email=="user@noregister"){
+     if (widget.laundry.email=="user@noregister"){
       Toast.show("Please register to view accept jobs", context,
           duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
       return;
@@ -182,17 +171,18 @@ class _DetailInterfaceState extends State<DetailInterface> {
 
   void _showDialog() {
     // flutter defined function
-    if (int.parse(widget.user.credit)<1){
+    if (int.parse(widget.laundry.credit)<1){
         Toast.show("Credit not enough ", context,
             duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
             return;
     }
+    
     showDialog(
       context: context,
       builder: (BuildContext context) {
         // return object of type Dialog
         return AlertDialog(
-          title: new Text("Accept " + widget.job.jobtitle),
+          title: new Text("Spend 1 credit to accept " + widget.job.job_name + " from " + widget.job.job_owner),
           content: new Text("Are your sure?"),
           actions: <Widget>[
             // usually buttons at the bottom of the dialog
@@ -215,23 +205,26 @@ class _DetailInterfaceState extends State<DetailInterface> {
     );
   }
 
+  
+
   Future<String> acceptRequest() async {
-    String urlLoadJobs = "http://pickupandlaundry.com/thespotless/stuart/php/acceptJob.php";
+    String urlLoadJobs = "http://pickupandlaundry.com/thespotless/stuart/php/acceptjob.php";
     ProgressDialog pr = new ProgressDialog(context,
         type: ProgressDialogType.Normal, isDismissible: false);
     pr.style(message: "Accepting Job");
     pr.show();
     http.post(urlLoadJobs, body: {
-      "jobid": widget.job.jobid,
-      "email": widget.user.email,
-      "credit": widget.user.credit,
+      "job_id": widget.job.job_id,
+      "email": widget.laundry.email,
+      "credit": widget.laundry.credit,
+      
     }).then((res) {
       print(res.body);
       if (res.body == "success") {
         Toast.show("Success", context,
             duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
             pr.dismiss();
-            _onLogin(widget.user.email, context);
+            _onLogin(widget.laundry.email, context);
       } else {
         Toast.show("Failed", context,
             duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
@@ -245,7 +238,7 @@ class _DetailInterfaceState extends State<DetailInterface> {
   }
 
    void _onLogin(String email, BuildContext ctx) {
-     String urlgetuser = "http://pickupandlaundry.com/thespotless/stuart/php/getUser.php";
+     String urlgetuser = "http://pickupandlaundry.com/thespotless/stuart/php/getdriver.php";
 
     http.post(urlgetuser, body: {
       "email": email,
@@ -255,15 +248,13 @@ class _DetailInterfaceState extends State<DetailInterface> {
       List dres = string.split(",");
       print(dres);
       if (dres[0] == "success") {
-        User user = new User(
+        Laundry laundry = new Laundry(
             name: dres[1],
             email: dres[2],
             phone: dres[3],
-            radius: dres[4],
-            credit: dres[5],
-            rating: dres[6]);
+            credit: dres[4]);
         Navigator.push(ctx,
-            MaterialPageRoute(builder: (context) => MainScreen(user: user)));
+            MaterialPageRoute(builder: (context) => MainScreen(laundry: laundry)));
       }
     }).catchError((err) {
       print(err);
