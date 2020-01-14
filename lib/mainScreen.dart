@@ -26,7 +26,6 @@ class _MainScreenState extends State<MainScreen> {
     tabs = [
       JobList(laundry: widget.laundry),
       MyJob(laundry: widget.laundry),
-      MyPost(laundry: widget.laundry),
       Profile(laundry: widget.laundry),
     ];
   }
@@ -58,10 +57,6 @@ class _MainScreenState extends State<MainScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.event, ),
             title: Text("My Job"),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.event, ),
-            title: Text("My Post"),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person ),

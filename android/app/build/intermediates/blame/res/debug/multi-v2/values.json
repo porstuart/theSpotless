@@ -1,27 +1,8 @@
 {
     "logs": [
         {
-            "outputFile": "C:\\Users\\porst_fv9ali2\\Desktop\\STIW_2044_My_Pickup\\android\\app\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values\\values.xml",
+            "outputFile": "C:\\Users\\porst_fv9ali2\\Desktop\\STIW_2044_My_Laundry\\android\\app\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values\\values.xml",
             "map": [
-                {
-                    "source": "C:\\Users\\porst_fv9ali2\\Desktop\\STIW_2044_My_Pickup\\android\\app\\src\\main\\res\\values\\styles.xml",
-                    "from": {
-                        "startLines": "2",
-                        "startColumns": "4",
-                        "startOffsets": "57",
-                        "endLines": "6",
-                        "endColumns": "12",
-                        "endOffsets": "353"
-                    },
-                    "to": {
-                        "startLines": "40",
-                        "startColumns": "4",
-                        "startOffsets": "2416",
-                        "endLines": "44",
-                        "endColumns": "12",
-                        "endOffsets": "2708"
-                    }
-                },
                 {
                     "source": "C:\\Users\\porst_fv9ali2\\.gradle\\caches\\transforms-1\\files-1.1\\core-1.0.1.aar\\e113e557115189782267c4639de60f9a\\res\\values\\values.xml",
                     "from": {
@@ -39,6 +20,25 @@
                         "endLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,45,49,50,54,55,56,57,64,107,139,176,183",
                         "endColumns": "68,62,57,73,69,67,71,69,60,73,72,60,60,61,63,61,60,67,99,59,65,72,68,56,51,61,71,75,34,34,49,60,56,33,34,34,69,70,116,12,109,12,128,71,66,24,24,24,24,24",
                         "endOffsets": "119,182,240,314,384,452,524,594,655,729,802,863,924,986,1050,1112,1173,1241,1341,1401,1467,1540,1609,1666,1718,1780,1852,1928,1963,1998,2048,2109,2166,2200,2235,2270,2340,2411,2825,3026,3136,3337,3466,3538,3605,3903,6809,8874,10634,11011"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\porst_fv9ali2\\Desktop\\STIW_2044_My_Laundry\\android\\app\\src\\main\\res\\values\\styles.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "57",
+                        "endLines": "6",
+                        "endColumns": "12",
+                        "endOffsets": "353"
+                    },
+                    "to": {
+                        "startLines": "40",
+                        "startColumns": "4",
+                        "startOffsets": "2416",
+                        "endLines": "44",
+                        "endColumns": "12",
+                        "endOffsets": "2708"
                     }
                 }
             ]

@@ -36,7 +36,7 @@ class _JobListState extends State<JobList> {
   Widget build(BuildContext context) {
     
    SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(statusBarColor: Colors.orange));
+        SystemUiOverlayStyle(statusBarColor: Colors.blue));
     return MaterialApp(
       debugShowCheckedModeBanner: false,
         home: Scaffold(
@@ -44,7 +44,7 @@ class _JobListState extends State<JobList> {
               
               body: RefreshIndicator(
               key: refreshKey,
-              color: Colors.orange,
+              color: Colors.blue,
               onRefresh: () async {
                 await refreshList();
               },
@@ -68,11 +68,11 @@ class _JobListState extends State<JobList> {
                                 child: Container(
                                   padding: EdgeInsets.fromLTRB(15,15,15,5),
                                   decoration: BoxDecoration(
-                                  color: Colors.orange[100],
-                                  border: Border.all(color: Colors.orange[300]),
+                                  color: Colors.blue[100],
+                                  border: Border.all(color: Colors.blue[300]),
                                   borderRadius: BorderRadius.all(
                                   Radius.circular(10.0)),
-                                  boxShadow: [BoxShadow(blurRadius: 10,color: Colors.orange[400],offset: Offset(0,0))]),
+                                  boxShadow: [BoxShadow(blurRadius: 10,color: Colors.blue[400],offset: Offset(0,0))]),
                                         child: Column(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceEvenly,
@@ -145,7 +145,7 @@ class _JobListState extends State<JobList> {
 
                                   Container(
                                     padding: EdgeInsets.fromLTRB(15,5,15,5),
-                                    color: Colors.orange,
+                                    color: Colors.blue,
                                     child: Center(
                                     child: Text("Job List Today",
                                     style: TextStyle(
@@ -213,7 +213,7 @@ class _JobListState extends State<JobList> {
                                         image: new DecorationImage(
                                             fit: BoxFit.cover,
                                             image: new AssetImage(
-                                                "assets/images/washinemachine.PNG")
+                                                "assets/images/washingmachine.PNG")
                                             
                               ))),
                                 Expanded(

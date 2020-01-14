@@ -24,14 +24,14 @@ class _JobDetailState extends State<JobDetail> {
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(statusBarColor: Colors.deepOrange));
+        SystemUiOverlayStyle(statusBarColor: Colors.blue));
     return WillPopScope(
       onWillPop: _onBackPressAppBar,
       child: Scaffold(
           resizeToAvoidBottomPadding: false,
           appBar: AppBar(
             title: Text('JOB DETAILS'),
-            backgroundColor: Colors.deepOrange,
+            backgroundColor: Colors.blue,
           ),
           body: SingleChildScrollView(
             child: Container(
@@ -105,12 +105,12 @@ class _DetailInterfaceState extends State<DetailInterface> {
                   Text(widget.job.job_desc),
                 ]),
                 TableRow(children: [
-                  Text("Job Location",
+                  Text("Cloth Pickup",
                       style: TextStyle(fontWeight: FontWeight.bold)),
                   Text(widget.job.job_location),
                 ]),
                 TableRow(children: [
-                  Text("Job Destination",
+                  Text("Cloth Return",
                       style: TextStyle(fontWeight: FontWeight.bold)),
                   Text(widget.job.job_destination),
                 ]),
@@ -143,7 +143,7 @@ class _DetailInterfaceState extends State<DetailInterface> {
                     'ACCEPT JOB',
                     style: TextStyle(fontSize: 16),
                   ),
-                  color: Colors.deepOrangeAccent,
+                  color: Colors.blue,
                   textColor: Colors.white,
                   elevation: 5,
                   onPressed: _onAcceptJob,

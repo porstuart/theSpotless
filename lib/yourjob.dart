@@ -15,7 +15,7 @@ class _YourJobState extends State<YourJob> {
         backgroundColor: Colors.white,
         resizeToAvoidBottomPadding: false,
         appBar: AppBar(
-          backgroundColor: Colors.orange,
+          backgroundColor: Colors.blue,
           title: Text('Your Job'),
         ),
         body: SingleChildScrollView(

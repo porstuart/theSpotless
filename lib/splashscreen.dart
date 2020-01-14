@@ -14,7 +14,7 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: new ThemeData(primarySwatch: Colors.orange),
+      theme: new ThemeData(primarySwatch: Colors.blue),
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: Center(
@@ -22,7 +22,7 @@ class SplashScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Image.asset(
-                'assets/images/logo2.png',
+                'assets/images/splashScreenLogo.png',
                 scale: 2,
               ),
               SizedBox(
@@ -80,7 +80,7 @@ class _ProgressIndicatorState extends State<ProgressIndicator>
         value: animation.value,
         backgroundColor: Colors.teal,
         valueColor:
-            new AlwaysStoppedAnimation<Color>(Colors.orange),
+            new AlwaysStoppedAnimation<Color>(Colors.blue),
       ),
     ));
   }

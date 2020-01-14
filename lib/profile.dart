@@ -50,7 +50,7 @@ class _ProfileState extends State<Profile> {
           backgroundColor: Colors.white,
           resizeToAvoidBottomPadding: false,
            appBar: AppBar(
-          backgroundColor: Colors.orange,
+          backgroundColor: Colors.blue,
           title: Text('Profile', style: TextStyle(color:Colors.black)),
         ),
           body: ListView.builder(
@@ -123,7 +123,7 @@ class _ProfileState extends State<Profile> {
                                 ],
                               ),
                               Container(
-                                color: Colors.orange,
+                                color: Colors.blue,
                                 child: Center(
                                   child: Text("My Profile ",
                                       style: TextStyle(

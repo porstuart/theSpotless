@@ -42,7 +42,7 @@ class _RegisterUserState extends State<RegisterScreen> {
         resizeToAvoidBottomPadding: false,
         appBar: AppBar(
           title: Text('New User Registration'),
-          backgroundColor: Colors.orange,
+          backgroundColor: Colors.blue,
           
         ),
         body: SingleChildScrollView(
@@ -133,7 +133,7 @@ class RegisterWidgetState extends State<RegisterWidget> {
           minWidth: 300,
           height: 50,
           child: Text('Register'),
-          color: Colors.orange,
+          color: Colors.blue,
           textColor: Colors.black,
           elevation: 15,
           onPressed: _onRegister,

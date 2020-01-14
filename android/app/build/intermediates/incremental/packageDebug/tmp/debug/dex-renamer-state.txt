@@ -1,4 +1,4 @@
-#Mon Jan 13 21:22:06 IRKT 2020
-base.0=C\:\\Users\\porst_fv9ali2\\Desktop\\STIW_2044_My_Pickup\\android\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\0
+#Tue Jan 14 12:26:26 IRKT 2020
+base.0=C\:\\Users\\porst_fv9ali2\\Desktop\\STIW_2044_My_Laundry\\android\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\0
 path.0=classes.dex
 renamed.0=classes.dex

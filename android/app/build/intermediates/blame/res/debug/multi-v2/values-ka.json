@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "C:\\Users\\porst_fv9ali2\\Desktop\\STIW_2044_My_Pickup\\android\\app\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-ka\\values-ka.xml",
+            "outputFile": "C:\\Users\\porst_fv9ali2\\Desktop\\STIW_2044_My_Laundry\\android\\app\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-ka\\values-ka.xml",
             "map": [
                 {
                     "source": "C:\\Users\\porst_fv9ali2\\.gradle\\caches\\transforms-1\\files-1.1\\core-1.0.1.aar\\e113e557115189782267c4639de60f9a\\res\\values-ka\\values-ka.xml",

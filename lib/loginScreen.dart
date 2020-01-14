@@ -56,7 +56,7 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Image.asset(
-                  'assets/images/logo2.png',
+                  'assets/images/splashScreenLogo.png',
                   scale: 2.5,
                 ),
                 TextField(
@@ -79,7 +79,7 @@ class _LoginPageState extends State<LoginPage> {
                   minWidth: 300,
                   height: 50,
                   child: Text('Login'),
-                  color: Colors.orange,
+                  color: Colors.blue,
                   textColor: Colors.black,
                   elevation: 15,
                   onPressed: _onLogin,

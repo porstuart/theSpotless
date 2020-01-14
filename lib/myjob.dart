@@ -22,149 +22,141 @@ class MyJob extends StatefulWidget {
 }
 
 class _MyJobState extends State<MyJob> {
-   GlobalKey<RefreshIndicatorState> refreshKey;
+  GlobalKey<RefreshIndicatorState> refreshKey;
 
   List data;
 
   void initState() {
     super.initState();
     refreshKey = GlobalKey<RefreshIndicatorState>();
-    
   }
 
   @override
   Widget build(BuildContext context) {
-    
-   SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(statusBarColor: Colors.orange));
+    SystemChrome.setSystemUIOverlayStyle(
+        SystemUiOverlayStyle(statusBarColor: Colors.blue));
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
+        debugShowCheckedModeBanner: false,
         home: Scaffold(
             resizeToAvoidBottomPadding: false,
-              
-              body: RefreshIndicator(
+            body: RefreshIndicator(
               key: refreshKey,
-              color: Colors.orange,
+              color: Colors.blue,
               onRefresh: () async {
                 await refreshList();
               },
-
-              child:ListView.builder(
-                  
+              child: ListView.builder(
                   itemCount: data == null ? 1 : data.length + 1,
                   itemBuilder: (context, index) {
                     if (index == 0) {
                       return Container(
-                        child: Column(
+                          child: Column(children: <Widget>[
+                        Column(
                           children: <Widget>[
-                                Column(
-                                children: <Widget>[
-                                  Container(
-                                    padding: EdgeInsets.fromLTRB(10,10,10,5),
-                                    height: MediaQuery.of(context).size.height/5,
-                                    width: MediaQuery.of(context).size.width,
-                                    color: Colors.teal[50],
-                  
-                                child: Container(
-                                  padding: EdgeInsets.fromLTRB(15,15,15,5),
-                                  decoration: BoxDecoration(
-                                  color: Colors.orange[100],
-                                  border: Border.all(color: Colors.orange[300]),
-                                  borderRadius: BorderRadius.all(
-                                  Radius.circular(10.0)),
-                                  boxShadow: [BoxShadow(blurRadius: 10,color: Colors.orange[400],offset: Offset(0,0))]),
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
-                                          children: <Widget>[
-                                            Row(
-                                              children: <Widget>[
-                                                Icon(Icons.person,
-                                                    ),
-                                                SizedBox(
-                                                  width: 5,
-                                                ),
-                                                Flexible(
-                                                  child: Text(
-                                                    widget.laundry.name
-                                                            .toUpperCase() ??
-                                                        "Not registered",
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            Row(
-                                              children: <Widget>[
-                                                Icon(Icons.email,
-                                                    ),
-                                                SizedBox(
-                                                  width: 5,
-                                                ),
-                                                Flexible(
-                                                  child: Text(widget.laundry.email),
-                                                ),
-                                              ],
-                                            ),
-                                            Row(
-                                              children: <Widget>[
-                                                Icon(Icons.phone,
-                                                    ),
-                                                SizedBox(
-                                                  width: 5,
-                                                ),
-                                                Flexible(
-                                                  child: Text(widget.laundry.phone),
-                                                ),
-                                              ],
-                                            ),
-                                            Row(
-                                              children: <Widget>[
-                                                Icon(Icons.attach_money,
-                                                    ),
-                                                SizedBox(
-                                                  width: 5,
-                                                ),
-                                                Flexible(
-                                                  child: Text(widget.laundry.credit),
-                                                ),
-                                              ],
-                                            ),
-                                            
-                                            
-                                            
-                                          ],
+                            Container(
+                              padding: EdgeInsets.fromLTRB(10, 10, 10, 5),
+                              height: MediaQuery.of(context).size.height / 5,
+                              width: MediaQuery.of(context).size.width,
+                              color: Colors.teal[50],
+                              child: Container(
+                                padding: EdgeInsets.fromLTRB(15, 15, 15, 5),
+                                decoration: BoxDecoration(
+                                    color: Colors.blue[100],
+                                    border: Border.all(color: Colors.blue[300]),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(10.0)),
+                                    boxShadow: [
+                                      BoxShadow(
+                                          blurRadius: 10,
+                                          color: Colors.blue[400],
+                                          offset: Offset(0, 0))
+                                    ]),
+                                child: Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: <Widget>[
+                                    Row(
+                                      children: <Widget>[
+                                        Icon(
+                                          Icons.person,
                                         ),
-                                  ),),
-
-                                  SizedBox(
-                                    height: 15,
-                                  ),
-
-                                  Container(
-                                    padding: EdgeInsets.fromLTRB(15,5,15,5),
-                                    color: Colors.orange,
-                                    child: Center(
-                                    child: Text("Job Accepted",
-                                    style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white)
-                                    ),),                            
+                                        SizedBox(
+                                          width: 5,
+                                        ),
+                                        Flexible(
+                                          child: Text(
+                                            widget.laundry.name.toUpperCase() ??
+                                                "Not registered",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-
-                                    SizedBox(
-                                      height: 4,
+                                    Row(
+                                      children: <Widget>[
+                                        Icon(
+                                          Icons.email,
+                                        ),
+                                        SizedBox(
+                                          width: 5,
+                                        ),
+                                        Flexible(
+                                          child: Text(widget.laundry.email),
+                                        ),
+                                      ],
                                     ),
-
-                                ],
+                                    Row(
+                                      children: <Widget>[
+                                        Icon(
+                                          Icons.phone,
+                                        ),
+                                        SizedBox(
+                                          width: 5,
+                                        ),
+                                        Flexible(
+                                          child: Text(widget.laundry.phone),
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: <Widget>[
+                                        Icon(
+                                          Icons.attach_money,
+                                        ),
+                                        SizedBox(
+                                          width: 5,
+                                        ),
+                                        Flexible(
+                                          child: Text(widget.laundry.credit),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
-                      
-                        ])
-                      );
-                    }                   
+                            ),
+                            SizedBox(
+                              height: 15,
+                            ),
+                            Container(
+                              padding: EdgeInsets.fromLTRB(15, 5, 15, 5),
+                              color: Colors.blue,
+                              child: Center(
+                                child: Text("Job Accepted",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white)),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 4,
+                            ),
+                          ],
+                        ),
+                      ]));
+                    }
                     if (index == data.length && perpage > 1) {
                       return Container(
                         width: 250,
@@ -187,7 +179,7 @@ class _MyJobState extends State<MyJob> {
                           onLongPress: () => _onJobDelete(
                               data[index]['job_id'].toString(),
                               data[index]['job_name'].toString()),
-                          onTap: ()=> _onJobDetail(
+                          onTap: () => _onJobDetail(
                             data[index]['job_id'],
                             data[index]['job_name'],
                             data[index]['job_price'],
@@ -212,10 +204,8 @@ class _MyJobState extends State<MyJob> {
                                         border: Border.all(color: Colors.white),
                                         image: new DecorationImage(
                                             fit: BoxFit.cover,
-                                            image: new NetworkImage(
-                                                "http://pickupandlaundry.com/thespotless/stuart/profile/${data[index]['job_owner']}.jpg")
-                                            
-                              ))),
+                                            image: new AssetImage(
+                                                "assets/images/washingmachine.PNG")))),
                                 Expanded(
                                   child: Container(
                                     child: Column(
@@ -227,12 +217,10 @@ class _MyJobState extends State<MyJob> {
                                             style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold)),
-                                        
                                         SizedBox(
                                           height: 5,
                                         ),
                                         Text("Date " + data[index]['job_date']),
-                                        
                                       ],
                                     ),
                                   ),
@@ -244,12 +232,12 @@ class _MyJobState extends State<MyJob> {
                       ),
                     );
                   }),
-    )));
+            )));
   }
 
-
   Future<String> makeRequest() async {
-    String urlLoadJobs = "http://pickupandlaundry.com/thespotless/stuart/php/loadmyjob.php";
+    String urlLoadJobs =
+        "http://pickupandlaundry.com/thespotless/stuart/php/loadmyjob.php";
     ProgressDialog pr = new ProgressDialog(context,
         type: ProgressDialogType.Normal, isDismissible: false);
     pr.style(message: "Loading Jobs");
@@ -295,21 +283,23 @@ class _MyJobState extends State<MyJob> {
       String name,
       String credit) {
     Job job = new Job(
-        job_id: job_id,
-        job_name: job_name,
-        job_price: job_price,
-        job_desc: job_desc,
-        job_location: job_location,
-        job_destination: job_destination,
-        job_owner: job_owner,
-        job_date: job_date,
-        driver_email: driver_email,
-       );
+      job_id: job_id,
+      job_name: job_name,
+      job_price: job_price,
+      job_desc: job_desc,
+      job_location: job_location,
+      job_destination: job_destination,
+      job_owner: job_owner,
+      job_date: job_date,
+      driver_email: driver_email,
+    );
     //print(data);
-    
-    Navigator.push(context, SlideRightRoute(page: JobDetailDone(job: job, laundry: widget.laundry)));
-  }
 
+    Navigator.push(
+        context,
+        SlideRightRoute(
+            page: JobDetailDone(job: job, laundry: widget.laundry)));
+  }
 
   void _onJobDelete(String job_id, String job_name) {
     print("Delete " + job_id);
@@ -347,7 +337,8 @@ class _MyJobState extends State<MyJob> {
   }
 
   Future<String> deleteRequest(String job_id) async {
-    String urlLoadJobs = "http://pickupandlaundry.com/thespotless/stuart/php/deletejob.php";
+    String urlLoadJobs =
+        "http://pickupandlaundry.com/thespotless/stuart/php/deletejob.php";
     ProgressDialog pr = new ProgressDialog(context,
         type: ProgressDialogType.Normal, isDismissible: false);
     pr.style(message: "Deleting Jobs");
@@ -370,6 +361,4 @@ class _MyJobState extends State<MyJob> {
     });
     return null;
   }
-
-
 }

@@ -49,7 +49,7 @@ class _MyPostState extends State<MyPost> {
             resizeToAvoidBottomPadding: false,
             floatingActionButton: FloatingActionButton(
               child: Icon(Icons.add),
-              backgroundColor: Colors.deepOrange,
+              backgroundColor: Colors.blue,
               elevation: 2.0,
               onPressed: _addJobDialog,
               tooltip: 'Request new help',
